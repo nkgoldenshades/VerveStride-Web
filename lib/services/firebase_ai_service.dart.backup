@@ -1,0 +1,621 @@
+import 'dart:convert';
+import 'dart:io';
+import 'package:firebase_ai/firebase_ai.dart';
+import 'package:flutter/foundation.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
+import 'local_storage_service.dart';
+import 'user_subscription_service.dart';
+import 'unified_ai_context_service.dart';
+
+/// Firebase AI Logic service — no API keys in the app, no Cloud Functions needed.
+/// TWO models:
+///   • gemini-2.0-flash          → general use (meal analysis, chat, insights)
+///   • gemini-2.0-flash-live-001 → live workout coaching (sub-second streaming)
+class FirebaseAIService {
+  static final FirebaseAIService instance = FirebaseAIService._internal();
+  factory FirebaseAIService() => instance;
+  FirebaseAIService._internal();
+
+  // General model — meal analysis, chat, voice commands, insights
+  static const String _generalModel = 'gemini-2.5-flash';
+
+  // Live model — real-time workout coaching, sub-second response
+  static const String _liveModel = 'gemini-2.5-flash-native-audio-preview-12-2025';
+
+  GenerativeModel? _modelInstance;
+  LiveGenerativeModel? _liveModelInstance;
+
+  /// General model — lazy init, reused across all non-workout calls
+  /// Now includes full user context for personalized responses
+  Future<GenerativeModel> _getModel({bool includeContext = true}) async {
+    if (_modelInstance != null && !includeContext) {
+      return _modelInstance!;
+    }
+
+    // Build system instruction with user context
+    String systemPrompt = 'You are VerveStride AI — a friendly, expert fitness and nutrition coach. '
+        'You help users with workouts, meal planning, calorie tracking, and motivation. '
+        'Be concise, encouraging, and practical. Max 3 sentences per response.';
+
+    if (includeContext) {
+      try {
+        final contextSummary = await UnifiedAIContextService.instance.buildContextSummary(historyDays: 7);
+        systemPrompt += '\n\nCURRENT USER CONTEXT:\n$contextSummary';
+        systemPrompt += '\nUse this context to provide personalized advice. Reference their goals, recent activities, and progress when relevant.';
+      } catch (e) {
+        debugPrint('⚠️ Failed to load context for AI: $e');
+      }
+    }
+
+    _modelInstance = FirebaseAI.googleAI(
+      // Disable App Check on web and in debug mode to avoid reCAPTCHA issues
+      appCheck: null,
+    ).generativeModel(
+      model: _generalModel,
+      systemInstruction: Content.system(systemPrompt),
+    );
+    
+    return _modelInstance!;
+  }
+
+  /// Live model — for real-time workout coaching during active sessions
+  LiveGenerativeModel _getLiveModel() {
+    _liveModelInstance ??= FirebaseAI.googleAI(
+      // Disable App Check on web and in debug mode to avoid reCAPTCHA issues
+      appCheck: null,
+    ).liveGenerativeModel(
+      model: _liveModel,
+      liveGenerationConfig: LiveGenerationConfig(
+        speechConfig: SpeechConfig(voiceName: 'Aoede'),
+      ),
+      systemInstruction: Content.system(
+        'You are a real-time workout coach inside VerveStride. '
+        'Give ONE short motivational cue, max 8 words. '
+        'Be energetic and specific to the exercise. No punctuation.',
+      ),
+    );
+    return _liveModelInstance!;
+  }
+
+  /// Dispose live session when workout ends
+  void disposeLiveSession() {
+    _liveModelInstance = null;
+  }
+
+  /// Reset model instances (useful for hot restart or Firebase re-initialization)
+  void resetModels() {
+    _modelInstance = null;
+    _liveModelInstance = null;
+    debugPrint('🔄 Firebase AI models reset');
+  }
+
+  /// Check if Firebase AI is available — requires Pro or Elite plan
+  Future<bool> isAIEnabled() async {
+    // Ensure subscription state is loaded before checking (force reload to get latest)
+    await UserSubscriptionService.instance.load(force: true);
+    final sub = UserSubscriptionService.instance;
+    final enabled = sub.isPro || sub.isElite || sub.isLifetime;
+    debugPrint('🤖 isAIEnabled: $enabled (isPro: ${sub.isPro}, isElite: ${sub.isElite}, isLifetime: ${sub.isLifetime})');
+    return enabled;
+  }
+
+  /// Throws a descriptive error string if the user can't access a feature.
+  /// [requireElite] — true for live coaching (Elite-only).
+  /// Returns null if access is granted.
+  Future<String?> _checkAccess({bool requireElite = false}) async {
+    await UserSubscriptionService.instance.load(force: true);
+    final sub = UserSubscriptionService.instance;
+    debugPrint('🔒 Access check — isPro: ${sub.isPro}, isElite: ${sub.isElite}, isLifetime: ${sub.isLifetime}');
+    if (requireElite) {
+      if (!sub.isElite && !sub.isLifetime) {
+        return 'Live AI coaching requires Elite or Lifetime plan.';
+      }
+      return null;
+    }
+    if (!sub.isPro && !sub.isElite && !sub.isLifetime) {
+      return 'AI features require a Pro or Elite plan. Upgrade in Settings → Premium.';
+    }
+    return null;
+  }
+
+  /// Checks the monthly meal analysis limit for Pro users (50/month).
+  /// Elite / Lifetime = unlimited. Returns error string or null.
+  Future<String?> _checkMealAnalysisLimit() async {
+    final sub = UserSubscriptionService.instance;
+    if (sub.isElite || sub.isLifetime) return null; // unlimited
+
+    final limit = sub.aiMealAnalysisLimit ?? 5;
+    final settings = await LocalStorageService.instance.getAppSettings() ?? {};
+    final monthKey = _currentMonthKey();
+    final used = (settings['ai_meal_count_$monthKey'] as int?) ?? 0;
+
+    if (used >= limit) {
+      return 'Monthly AI meal analysis limit reached ($limit). '
+          'Upgrade to Elite for unlimited analyses.';
+    }
+    return null;
+  }
+
+  Future<void> _incrementMealAnalysisCount() async {
+    final settings = await LocalStorageService.instance.getAppSettings() ?? {};
+    final monthKey = _currentMonthKey();
+    final used = (settings['ai_meal_count_$monthKey'] as int?) ?? 0;
+    settings['ai_meal_count_$monthKey'] = used + 1;
+    await LocalStorageService.instance.saveAppSettings(settings);
+  }
+
+  String _currentMonthKey() {
+    final now = DateTime.now();
+    return '${now.year}_${now.month.toString().padLeft(2, '0')}';
+  }
+
+  /// Check if a specific feature is enabled
+  Future<bool> isFeatureEnabled(String feature) async {
+    final settings = await LocalStorageService.instance.getAISettings();
+    switch (feature) {
+      case 'photo_analysis':
+        return (settings['photo_analysis_enabled'] as bool?) ?? true;
+      case 'voice_commands':
+        return (settings['voice_enabled'] as bool?) ?? true;
+      case 'conversational_ai':
+        return (settings['conversational_ai_enabled'] as bool?) ?? true;
+      case 'data_analytics':
+        return (settings['data_analytics_enabled'] as bool?) ?? true;
+      default:
+        return true;
+    }
+  }
+
+  // ─────────────────────────────────────────────
+  // MEAL PHOTO ANALYSIS
+  // ─────────────────────────────────────────────
+
+  /// Analyze a meal photo and return structured nutrition data.
+  /// Works on mobile and web — no API key required.
+  Future<MealAnalysis?> analyzeMealPhoto(File imageFile) async {
+    final accessError = await _checkAccess();
+    if (accessError != null) { debugPrint('🔒 $accessError'); return null; }
+    final limitError = await _checkMealAnalysisLimit();
+    if (limitError != null) { debugPrint('🔒 $limitError'); return null; }
+    if (!await isFeatureEnabled('photo_analysis')) return null;
+
+    try {
+      final bytes = await imageFile.readAsBytes();
+      final result = await _analyzeMealBytes(bytes);
+      if (result != null) await _incrementMealAnalysisCount();
+      return result;
+    } catch (e) {
+      debugPrint('❌ Meal photo analysis error: $e');
+      return null;
+    }
+  }
+
+  Future<MealAnalysis?> analyzeMealBytes(Uint8List bytes) async {
+    final accessError = await _checkAccess();
+    if (accessError != null) { debugPrint('🔒 $accessError'); return null; }
+    final limitError = await _checkMealAnalysisLimit();
+    if (limitError != null) { debugPrint('🔒 $limitError'); return null; }
+    if (!await isFeatureEnabled('photo_analysis')) return null;
+    final result = await _analyzeMealBytes(bytes);
+    if (result != null) await _incrementMealAnalysisCount();
+    return result;
+  }
+
+  Future<MealAnalysis?> _analyzeMealBytes(Uint8List bytes) async {
+    try {
+      // Get user context for personalized meal analysis
+      final context = await UnifiedAIContextService.instance.getContextForFeature('meal_analysis');
+      final goals = context['goals'] as Map<String, dynamic>;
+      final profile = context['user_profile'] as Map<String, dynamic>;
+      final today = context['today'] as Map<String, dynamic>;
+
+      final model = await _getModel(includeContext: false); // Context added in prompt
+
+      final contextInfo = '''
+User Context:
+- Daily calorie goal: ${goals['daily_calorie_target']} kcal
+- Weight goal: ${profile['goal']}
+- Calories burned today: ${today['total_calories_burned']} kcal
+- Current weight: ${profile['weight_kg']} kg
+''';
+
+      final prompt = TextPart('''$contextInfo
+
+Analyze this meal photo considering the user's goals and return ONLY a JSON object.
+No markdown, no explanation, just raw JSON:
+{
+  "name": "Meal name",
+  "description": "Brief description (mention if it fits their goals)",
+  "calories": 450,
+  "protein": 25,
+  "carbs": 50,
+  "fat": 15,
+  "fiber": 5,
+  "sugar": 8,
+  "sodium": 600,
+  "meal_type": "lunch",
+  "confidence": 0.9
+}''');
+
+      final imagePart = InlineDataPart('image/jpeg', bytes);
+
+      final response = await model.generateContent([
+        Content.multi([prompt, imagePart]),
+      ]);
+
+      final text = response.text ?? '';
+      debugPrint('🍽️ Meal analysis response: $text');
+
+      final jsonMatch = RegExp(r'\{[\s\S]*\}').firstMatch(text);
+      if (jsonMatch != null) {
+        final data = jsonDecode(jsonMatch.group(0)!);
+        return MealAnalysis.fromJson(data);
+      }
+    } catch (e) {
+      debugPrint('❌ Firebase AI meal analysis error: $e');
+    }
+    return null;
+  }
+
+  // ─────────────────────────────────────────────
+  // LIVE WORKOUT COACHING  (gemini-2.0-flash-live-001)
+  // ─────────────────────────────────────────────
+
+  /// Real-time coaching cue during an active workout session.
+  /// Uses the Live model for sub-second response.
+  Future<String?> getWorkoutCoachingCue({
+    required String exerciseType,
+    required List<String> activeJoints,
+    required double intensity,
+    required int elapsedSeconds,
+  }) async {
+    final accessError = await _checkAccess(requireElite: true);
+    if (accessError != null) {
+      debugPrint('🔒 $accessError');
+      return null;
+    }
+
+    LiveSession? session;
+    try {
+      final liveModel = _getLiveModel();
+      session = await liveModel.connect();
+
+      final prompt =
+          '$exerciseType ${elapsedSeconds ~/ 60}min '
+          '${(intensity * 100).toStringAsFixed(0)}% intensity '
+          '${activeJoints.take(3).join(' ')}';
+
+      await session.send(
+        input: Content.text(prompt),
+        turnComplete: true,
+      );
+
+      String cue = '';
+      await for (final response in session.receive()) {
+        final msg = response.message;
+        if (msg is LiveServerContent) {
+          final parts = msg.modelTurn?.parts ?? [];
+          for (final part in parts) {
+            if (part is TextPart) cue += part.text;
+          }
+          if (msg.turnComplete == true) break;
+        }
+      }
+
+      return cue.trim().isEmpty ? null : cue.trim();
+    } catch (e) {
+      debugPrint('❌ Live coaching cue error: $e');
+      _liveModelInstance = null;
+      // Fallback to general model if live model fails
+      return _getCoachingCueFallback(
+        exerciseType: exerciseType,
+        intensity: intensity,
+        elapsedSeconds: elapsedSeconds,
+      );
+    } finally {
+      await session?.close();
+      _liveModelInstance = null;
+    }
+  }
+
+  /// Fallback to general model if live model is unavailable
+  Future<String?> _getCoachingCueFallback({
+    required String exerciseType,
+    required double intensity,
+    required int elapsedSeconds,
+  }) async {
+    try {
+      final model = await _getModel(includeContext: false);
+      final response = await model.generateContent([
+        Content.text(
+          '$exerciseType ${elapsedSeconds ~/ 60}min '
+          '${(intensity * 100).toStringAsFixed(0)}% intensity. '
+          'One coaching cue, max 8 words.',
+        ),
+      ]);
+      return response.text?.trim();
+    } catch (e) {
+      debugPrint('❌ Fallback coaching cue error: $e');
+      return null;
+    }
+  }
+    }
+  }
+
+  // ─────────────────────────────────────────────
+  // AI CHAT ASSISTANT
+  // ─────────────────────────────────────────────
+
+  /// Chat with the AI fitness assistant.
+  /// Now includes full user context for personalized conversations.
+  Future<String> chatWithAI(
+    String message, {
+    List<Map<String, dynamic>>? context,
+  }) async {
+    final accessError = await _checkAccess();
+    if (accessError != null) return accessError;
+    if (!await isFeatureEnabled('conversational_ai')) {
+      return 'AI features are disabled. Enable them in Settings.';
+    }
+
+    try {
+      // Get model with full user context
+      final model = await _getModel(includeContext: true);
+
+      // Build chat history
+      final history = <Content>[];
+
+      if (context != null) {
+        for (final msg in context) {
+          final role = msg['role'] as String? ?? 'user';
+          final content = msg['content'] as String? ?? '';
+          if (role == 'user') {
+            history.add(Content.text(content));
+          } else if (role == 'model' || role == 'assistant') {
+            history.add(Content.model([TextPart(content)]));
+          }
+        }
+      }
+
+      final chat = model.startChat(history: history);
+
+      final response = await chat.sendMessage(Content.text(message));
+      
+      // Save to chat history
+      await _saveChatMessage(message, response.text ?? '');
+      
+      return response.text ?? 'Sorry, I could not generate a response.';
+    } catch (e) {
+      debugPrint('❌ AI chat error: $e');
+      return 'AI is temporarily unavailable. Please try again.';
+    }
+  }
+
+  /// Save chat message to history for context continuity
+  Future<void> _saveChatMessage(String userMessage, String aiResponse) async {
+    try {
+      final history = await LocalStorageService.instance.getAIChatHistory();
+      history.add({
+        'role': 'user',
+        'content': userMessage,
+        'created_at': DateTime.now().toIso8601String(),
+      });
+      history.add({
+        'role': 'model',
+        'content': aiResponse,
+        'created_at': DateTime.now().toIso8601String(),
+      });
+      
+      // Keep only last 50 messages (25 exchanges)
+      final trimmed = history.length > 50 ? history.sublist(history.length - 50) : history;
+      
+      await LocalStorageService.instance.saveAIChatHistory(trimmed);
+    } catch (e) {
+      debugPrint('⚠️ Failed to save chat history: $e');
+    }
+  }
+
+  // ─────────────────────────────────────────────
+  // VOICE COMMAND PROCESSING
+  // ─────────────────────────────────────────────
+
+  /// Parse spoken text into a structured app command.
+  /// Now context-aware for smarter command interpretation.
+  Future<VoiceCommand?> processVoiceCommand(String spokenText) async {
+    final accessError = await _checkAccess();
+    if (accessError != null) { debugPrint('🔒 $accessError'); return null; }
+    if (!await isFeatureEnabled('voice_commands')) return null;
+
+    try {
+      // Get user context for smarter command interpretation
+      final context = await UnifiedAIContextService.instance.buildUserContext(includeHistory: false);
+      final profile = context['user_profile'] as Map<String, dynamic>;
+      final today = context['today'] as Map<String, dynamic>;
+
+      final model = await _getModel(includeContext: false);
+
+      final contextInfo = '''
+User Context:
+- Name: ${profile['name']}
+- Recent activities today: ${(today['activities'] as List).length}
+- Water intake today: ${today['water_intake_ml']} ml
+''';
+
+      final prompt = '''$contextInfo
+
+Parse this voice command into a JSON action.
+User said: "$spokenText"
+
+Consider their context when interpreting the command.
+Return ONLY raw JSON (no markdown):
+{
+  "action": "start_workout|log_meal|log_water|show_progress|chat",
+  "parameters": {
+    "workout_type": "running",
+    "meal_name": "salad",
+    "calories": 300,
+    "water_ml": 250
+  },
+  "response": "Got it! Starting your run."
+}''';
+
+      final response = await (await model).generateContent([Content.text(prompt)]);
+      final text = response.text ?? '';
+
+      final jsonMatch = RegExp(r'\{[\s\S]*\}').firstMatch(text);
+      if (jsonMatch != null) {
+        final data = jsonDecode(jsonMatch.group(0)!);
+        return VoiceCommand.fromJson(data);
+      }
+    } catch (e) {
+      debugPrint('❌ Voice command error: $e');
+    }
+    return null;
+  }
+
+  // ─────────────────────────────────────────────
+  // DATA ANALYTICS INSIGHTS
+  // ─────────────────────────────────────────────
+
+  /// Generate personalized insights from user's fitness data.
+  /// Now uses unified context for comprehensive analysis.
+  Future<String?> generateInsights() async {
+    final accessError = await _checkAccess();
+    if (accessError != null) { debugPrint('🔒 $accessError'); return null; }
+    if (!await isFeatureEnabled('data_analytics')) return null;
+
+    try {
+      // Get comprehensive context for insights
+      final context = await UnifiedAIContextService.instance.getContextForFeature('insights');
+      final model = await _getModel(includeContext: false);
+
+      final prompt = '''Analyze this user's fitness data and provide 2-3 personalized insights:
+
+${jsonEncode(context)}
+
+Focus on:
+1. Progress towards their goals
+2. Patterns in their activity and nutrition
+3. Actionable recommendations
+
+Be specific, encouraging, and practical. Max 100 words total.''';
+
+      final resolvedModel = await model;
+      final response = await resolvedModel.generateContent([Content.text(prompt)]);
+      return response.text?.trim();
+    } catch (e) {
+      debugPrint('❌ Insights error: $e');
+      return null;
+    }
+  }
+
+  // ─────────────────────────────────────────────
+  // DATA EXPORT / DELETE
+  // ─────────────────────────────────────────────
+
+  Future<String> exportAllUserData() async {
+    try {
+      final storage = LocalStorageService.instance;
+      final userData = {
+        'export_date': DateTime.now().toIso8601String(),
+        'ai_settings': await storage.getAISettings(),
+        'ai_chat_history': await storage.getAIChatHistory(),
+        'app_settings': await storage.getAppSettings(),
+        'user_profile': await storage.getUserProfile(),
+      };
+
+      final jsonString = const JsonEncoder.withIndent('  ').convert(userData);
+      final directory = await getApplicationDocumentsDirectory();
+      final fileName = 'vervestride_data_${DateTime.now().millisecondsSinceEpoch}.json';
+      final file = File('${directory.path}/$fileName');
+      await file.writeAsString(jsonString);
+      return file.path;
+    } catch (e) {
+      throw Exception('Failed to export data: $e');
+    }
+  }
+
+  Future<void> shareExportedData(String filePath) async {
+    await Share.shareXFiles([XFile(filePath)], text: 'VerveStride Data Export');
+  }
+
+  Future<void> deleteAllUserData() async {
+    final storage = LocalStorageService.instance;
+    await storage.clearUserData();
+    await storage.saveAISettings({});
+  }
+
+  Future<void> speakResponse(String text) async {
+    // Integrate with flutter_tts if spoken output is needed
+    debugPrint('AI Response: $text');
+  }
+}
+
+// ─────────────────────────────────────────────
+// DATA MODELS
+// ─────────────────────────────────────────────
+
+class MealAnalysis {
+  final String name;
+  final String description;
+  final int calories;
+  final double protein;
+  final double carbs;
+  final double fat;
+  final double fiber;
+  final double sugar;
+  final double sodium;
+  final String mealType;
+  final double confidence;
+
+  MealAnalysis({
+    required this.name,
+    required this.description,
+    required this.calories,
+    required this.protein,
+    required this.carbs,
+    required this.fat,
+    required this.fiber,
+    required this.sugar,
+    required this.sodium,
+    required this.mealType,
+    required this.confidence,
+  });
+
+  factory MealAnalysis.fromJson(Map<String, dynamic> json) {
+    return MealAnalysis(
+      name: json['name'] ?? 'Unknown Meal',
+      description: json['description'] ?? '',
+      calories: (json['calories'] as num?)?.toInt() ?? 0,
+      protein: (json['protein'] as num?)?.toDouble() ?? 0,
+      carbs: (json['carbs'] as num?)?.toDouble() ?? 0,
+      fat: (json['fat'] as num?)?.toDouble() ?? 0,
+      fiber: (json['fiber'] as num?)?.toDouble() ?? 0,
+      sugar: (json['sugar'] as num?)?.toDouble() ?? 0,
+      sodium: (json['sodium'] as num?)?.toDouble() ?? 0,
+      mealType: json['meal_type'] ?? 'meal',
+      confidence: (json['confidence'] as num?)?.toDouble() ?? 0.8,
+    );
+  }
+}
+
+class VoiceCommand {
+  final String action;
+  final Map<String, dynamic> parameters;
+  final String response;
+
+  VoiceCommand({
+    required this.action,
+    required this.parameters,
+    required this.response,
+  });
+
+  factory VoiceCommand.fromJson(Map<String, dynamic> json) {
+    return VoiceCommand(
+      action: json['action'] ?? 'chat',
+      parameters: (json['parameters'] as Map<String, dynamic>?) ?? {},
+      response: json['response'] ?? '',
+    );
+  }
+}

@@ -1,0 +1,147 @@
+name: Build All Desktop Platforms
+
+on:
+  workflow_dispatch:  # Manual trigger from GitHub Actions tab
+  push:
+    branches:
+      - main
+    paths:
+      - 'lib/**'
+      - 'pubspec.yaml'
+      - '.github/workflows/build-all-platforms.yml'
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.0'
+          channel: 'stable'
+      
+      - name: Install dependencies
+        run: flutter pub get
+      
+      - name: Build Windows
+        run: flutter build windows --release
+      
+      - name: Create Windows ZIP
+        run: |
+          cd build\windows\x64\runner\Release
+          Compress-Archive -Path * -DestinationPath vervestride-windows-v1.0.0.zip
+      
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-build
+          path: build/windows/x64/runner/Release/vervestride-windows-v1.0.0.zip
+          retention-days: 30
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.0'
+          channel: 'stable'
+      
+      - name: Install dependencies
+        run: flutter pub get
+      
+      - name: Build macOS
+        run: flutter build macos --release
+      
+      - name: Create macOS ZIP
+        run: |
+          cd build/macos/Build/Products/Release
+          zip -r vervestride-macos-v1.0.0.zip VerveStride.app
+      
+      - name: Upload macOS artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-build
+          path: build/macos/Build/Products/Release/vervestride-macos-v1.0.0.zip
+          retention-days: 30
+
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Install Linux dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libstdc++-12-dev
+      
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.0'
+          channel: 'stable'
+      
+      - name: Install dependencies
+        run: flutter pub get
+      
+      - name: Build Linux
+        run: flutter build linux --release
+      
+      - name: Create Linux tarball
+        run: |
+          cd build/linux/x64/release
+          tar -czf vervestride-linux-v1.0.0.tar.gz bundle
+      
+      - name: Upload Linux artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-build
+          path: build/linux/x64/release/vervestride-linux-v1.0.0.tar.gz
+          retention-days: 30
+
+  build-android:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+      
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.0'
+          channel: 'stable'
+      
+      - name: Install dependencies
+        run: flutter pub get
+      
+      - name: Create debug keystore
+        run: |
+          mkdir -p android/app
+          keytool -genkey -v -keystore android/app/debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
+      
+      - name: Build Android APK
+        run: flutter build apk --release
+      
+      - name: Rename APK
+        run: |
+          cp build/app/outputs/flutter-apk/app-release.apk vervestride-v1.0.0.apk
+      
+      - name: Upload Android artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-build
+          path: vervestride-v1.0.0.apk
+          retention-days: 30

@@ -1,0 +1,10 @@
+VerveStride Linux - v1.0.0
+
+This is a placeholder file. Replace with actual Linux build:
+
+1. Build: flutter build linux --release
+2. Find folder: build/linux/x64/release/bundle/
+3. Create tar.gz: tar -czf vervestride-linux-v1.0.0.tar.gz -C build/linux/x64/release bundle
+4. Upload to R2 bucket
+
+Note: Requires Linux machine or WSL with flutter-linux dependencies.

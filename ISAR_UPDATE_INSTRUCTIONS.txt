@@ -1,0 +1,5 @@
+# To update Isar to the latest compatible version, run:
+# flutter pub add isar isar_flutter_libs isar_generator --dev
+# Then run:
+# flutter pub get
+# flutter pub run build_runner build --delete-conflicting-outputs

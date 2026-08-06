@@ -1,0 +1,11 @@
+VerveStride Windows - v1.0.0
+
+This is a placeholder file. Replace with actual Windows build:
+
+1. Build: flutter build windows --release
+2. Find folder: build/windows/runner/Release/
+3. Zip the entire Release folder
+4. Rename to: vervestride-windows-v1.0.0.zip
+5. Upload to R2 bucket
+
+Note: Requires Visual Studio with "Desktop development with C++" workload installed.

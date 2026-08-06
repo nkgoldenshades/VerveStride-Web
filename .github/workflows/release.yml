@@ -1,0 +1,213 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'  # Trigger on version tags like v1.0.0
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  # ============================================================================
+  # BUILD ANDROID APK
+  # ============================================================================
+  build-android:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.0'
+          channel: 'stable'
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build APK
+        run: flutter build apk --release
+
+      - name: Rename APK
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/}
+          mv build/app/outputs/flutter-apk/app-release.apk vervestride-$VERSION.apk
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: vervestride-*.apk
+
+  # ============================================================================
+  # BUILD WINDOWS EXE
+  # ============================================================================
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.0'
+          channel: 'stable'
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build Windows
+        run: flutter build windows --release
+
+      - name: Create ZIP
+        shell: pwsh
+        run: |
+          $VERSION = $env:GITHUB_REF -replace 'refs/tags/', ''
+          Compress-Archive -Path build/windows/x64/runner/Release/* -DestinationPath vervestride-windows-$VERSION.zip
+
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-exe
+          path: vervestride-windows-*.zip
+
+  # ============================================================================
+  # BUILD LINUX APPIMAGE
+  # ============================================================================
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.0'
+          channel: 'stable'
+
+      - name: Install Linux dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build Linux
+        run: flutter build linux --release
+
+      - name: Create tarball
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/}
+          cd build/linux/x64/release/bundle
+          tar -czf ../../../../../vervestride-linux-$VERSION.tar.gz *
+
+      - name: Upload Linux artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-bundle
+          path: vervestride-linux-*.tar.gz
+
+  # ============================================================================
+  # BUILD MACOS DMG
+  # ============================================================================
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.0'
+          channel: 'stable'
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build macOS
+        run: flutter build macos --release
+
+      - name: Create ZIP
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/}
+          cd build/macos/Build/Products/Release
+          zip -r ../../../../../vervestride-macos-$VERSION.zip vervestride.app
+
+      - name: Upload macOS artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-dmg
+          path: vervestride-macos-*.zip
+
+  # ============================================================================
+  # CREATE GITHUB RELEASE
+  # ============================================================================
+  create-release:
+    needs: [build-android, build-windows, build-linux, build-macos]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Display structure
+        run: ls -R artifacts
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            artifacts/android-apk/*.apk
+            artifacts/windows-exe/*.zip
+            artifacts/linux-bundle/*.tar.gz
+            artifacts/macos-dmg/*.zip
+          body: |
+            ## 🎉 VerveStride ${{ github.ref_name }}
+            
+            Your AI-powered fitness companion is here!
+            
+            ### ✨ Features:
+            - 🤖 AI Personal Trainer with chat & voice
+            - 💪 Workout tracking & custom plans
+            - 🍽️ AI meal analysis with camera
+            - 💧 Water intake tracking
+            - ⏰ Smart reminders & alarms
+            - 📊 Progress analytics
+            - 🔒 Privacy-first design
+            
+            ### 📥 Downloads:
+            - **Android**: APK for Android 8.0+
+            - **Windows**: ZIP for Windows 10/11
+            - **macOS**: ZIP for macOS 11+
+            - **Linux**: Tarball for Linux
+            
+            ### 🌐 Web App:
+            [https://vervestrideai.com](https://vervestrideai.com)
+            
+            ---
+            
+            **Installation:**
+            - Android: Enable "Install from unknown sources" then open APK
+            - Windows: Extract ZIP and run vervestride.exe
+            - macOS: Extract ZIP and move to Applications
+            - Linux: Extract tarball and run vervestride executable
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

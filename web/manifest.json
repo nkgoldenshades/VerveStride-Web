@@ -1,0 +1,92 @@
+{
+    "name": "VerveStride AI - Your Private AI Personal Assistant",
+    "short_name": "VerveStride AI",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#0F0F1A",
+    "theme_color": "#6B46C1",
+    "description": "Intelligence that moves with you. Premium AI assistant for fitness & wellness. Voice-activated, privacy-first, beautifully designed.",
+    "orientation": "portrait-primary",
+    "scope": "/",
+    "categories": [
+        "health",
+        "fitness",
+        "lifestyle",
+        "productivity"
+       
+    ],
+    "lang": "en",
+    "dir": "ltr",
+    "prefer_related_applications": false,
+    "shortcuts": [
+        {
+            "name": "AI Assistant",
+            "short_name": "AI",
+            "description": "Talk to your AI companion",
+            "url": "/ai_chat",
+            "icons": [
+                {
+                    "src": "icons/Icon-192.png",
+                    "sizes": "192x192"
+                }
+            ]
+        },
+        {
+            "name": "Start Workout",
+            "short_name": "Workout",
+            "description": "AI-powered workout tracking",
+            "url": "/workout_pip",
+            "icons": [
+                {
+                    "src": "icons/Icon-192.png",
+                    "sizes": "192x192"
+                }
+            ]
+        },
+        {
+            "name": "Log Meal",
+            "short_name": "Meal",
+            "description": "Smart meal logging",
+            "url": "/meals",
+            "icons": [
+                {
+                    "src": "icons/Icon-192.png",
+                    "sizes": "192x192"
+                }
+            ]
+        }
+    ],
+    "screenshots": [
+        {
+            "src": "icons/Icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "form_factor": "narrow",
+            "label": "VerveStride AI - Your intelligent fitness companion"
+        }
+    ],
+    "icons": [
+        {
+            "src": "icons/Icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "icons/Icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        },
+        {
+            "src": "icons/Icon-maskable-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "maskable"
+        },
+        {
+            "src": "icons/Icon-maskable-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ]
+}
