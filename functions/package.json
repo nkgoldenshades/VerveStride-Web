@@ -1,0 +1,29 @@
+{
+  "name": "vervestride-functions",
+  "description": "Cloud Functions for VerveStride subscription management",
+  "version": "1.0.0",
+  "scripts": {
+    "serve": "firebase emulators:start --only functions",
+    "shell": "firebase functions:shell",
+    "start": "npm run shell",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "engines": {
+    "node": "20"
+  },
+  "main": "index.js",
+  "dependencies": {
+    "firebase-admin": "^12.0.0",
+    "firebase-functions": "^5.0.0",
+    "razorpay": "^2.9.2",
+    "crypto": "^1.0.1",
+    "@google-cloud/vertexai": "^1.7.0",
+    "google-auth-library": "^9.0.0",
+    "node-fetch": "^2.7.0"
+  },
+  "devDependencies": {
+    "firebase-functions-test": "^3.1.0"
+  },
+  "private": true
+}

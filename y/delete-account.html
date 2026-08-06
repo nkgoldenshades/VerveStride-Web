@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delete Account - VerveStride</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo h1 {
+            color: #667eea;
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .logo p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .content {
+            margin-bottom: 30px;
+        }
+
+        h2 {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+        }
+
+        .warning-box h3 {
+            color: #856404;
+            font-size: 16px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .warning-box p {
+            color: #856404;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .info-section {
+            margin-bottom: 24px;
+        }
+
+        .info-section h3 {
+            color: #333;
+            font-size: 18px;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .info-section p {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.8;
+            margin-bottom: 12px;
+        }
+
+        .info-section ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .info-section ul li {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.8;
+            padding-left: 24px;
+            position: relative;
+            margin-bottom: 8px;
+        }
+
+        .info-section ul li:before {
+            content: "•";
+            color: #667eea;
+            font-weight: bold;
+            position: absolute;
+            left: 8px;
+        }
+
+        .steps {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .steps h3 {
+            color: #333;
+            font-size: 18px;
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+
+        .step {
+            margin-bottom: 16px;
+            padding-left: 32px;
+            position: relative;
+        }
+
+        .step-number {
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: #667eea;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .step p {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .contact-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 24px;
+        }
+
+        .contact-box h3 {
+            color: #1565c0;
+            font-size: 16px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .contact-box p {
+            color: #1565c0;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .contact-box a {
+            color: #1565c0;
+            text-decoration: underline;
+            font-weight: 600;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .footer p {
+            color: #999;
+            font-size: 12px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 24px;
+            }
+
+            .logo h1 {
+                font-size: 24px;
+            }
+
+            h2 {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <h1>🏃 VerveStride</h1>
+            <p>Your Personal Health Companion</p>
+        </div>
+
+        <div class="content">
+            <h2>Delete Your Account</h2>
+
+            <div class="warning-box">
+                <h3>⚠️ Important Warning</h3>
+                <p>Deleting your account is permanent and cannot be undone. All your data will be permanently removed from our servers.</p>
+            </div>
+
+            <div class="info-section">
+                <h3>What will be deleted:</h3>
+                <ul>
+                    <li>Your profile information (name, age, gender, height, weight)</li>
+                    <li>All activity tracking data (workouts, runs, walks, etc.)</li>
+                    <li>Meal logs and nutrition tracking history</li>
+                    <li>Water intake logs</li>
+                    <li>Streak data and achievements</li>
+                    <li>Calendar events and progress history</li>
+                    <li>All personal settings and preferences</li>
+                </ul>
+            </div>
+
+            <div class="steps">
+                <h3>How to Delete Your Account:</h3>
+                
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <p>Open the VerveStride app on your device</p>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <p>Go to the <strong>Profile</strong> tab (bottom navigation)</p>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <p>Tap the <strong>Settings</strong> icon (⚙️) in the top right corner</p>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <p>Scroll down to the <strong>Account</strong> section</p>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">5</div>
+                    <p>Tap <strong>"Delete Account"</strong></p>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">6</div>
+                    <p>Confirm your decision by tapping <strong>"Delete"</strong> in the confirmation dialog</p>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">7</div>
+                    <p>Your account and all associated data will be permanently deleted within 24 hours</p>
+                </div>
+            </div>
+
+            <div class="info-section">
+                <h3>Data Retention:</h3>
+                <p>After account deletion:</p>
+                <ul>
+                    <li>Your data will be permanently removed from our servers within 24 hours</li>
+                    <li>Some anonymized analytics data may be retained for service improvement</li>
+                    <li>Backup copies will be deleted within 30 days as per our backup retention policy</li>
+                    <li>You will be immediately logged out from all devices</li>
+                </ul>
+            </div>
+
+            <div class="contact-box">
+                <h3>Need Help?</h3>
+                <p>If you're having trouble deleting your account or have questions about data deletion, please contact our support team at <a href="mailto:vervestride.app@gmail.com">vervestride.app@gmail.com</a></p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>&copy; 2024 VerveStride. All rights reserved.</p>
+            <p>Built with ❤️ for your health journey</p>
+        </div>
+    </div>
+</body>
+</html>

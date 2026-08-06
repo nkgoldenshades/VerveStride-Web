@@ -1,0 +1,108 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+             get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // Fields that only backend (Admin SDK) can write — client cannot touch these
+    function touchesProtectedEntitlements() {
+      let incoming = request.resource.data;
+      let existing = resource != null ? resource.data : {};
+      let changed = incoming.diff(existing).affectedKeys();
+      return changed.hasAny([
+        'credits',
+        'Lifetime',
+        'lifetimeAccess',
+        'subscription',
+        'subscriptionTier',
+        'subscriptionStatus',
+        'subscriptionEnd',
+        'planTier',
+        'billingPeriod',
+        'currentPeriodEnd',
+        'provider',
+        'stripeSubscriptionId',
+        'tokensPerDay',
+        'adsFree',
+        'adFree',
+        'paymentId',
+        'purchaseTime'
+      ]);
+    }
+
+    // Credits map — client CAN write (deduct/add) but only safe fields
+    // Entitlement fields (Lifetime, subscription, planTier etc.) are blocked above
+
+    // Users collection
+    match /Users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) && !touchesProtectedEntitlements();
+      allow update: if isOwner(userId) && !touchesProtectedEntitlements();
+    }
+
+    // Credit usage logs — append only
+    match /credit_usage/{usageId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if false;
+    }
+
+    // User fitness data — owner can read/write but with size limits
+    match /user_data/{userId} {
+      allow read: if isOwner(userId);
+      allow write: if isOwner(userId)
+        && request.resource.data.size() < 500000; // max 500KB per doc
+    }
+
+    // Transactions — read only for owner, write by backend only
+    match /transactions/{transactionId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow write: if false;
+    }
+
+    // Payments — read only for owner, write by backend only
+    match /payments/{paymentId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow write: if false;
+    }
+
+    // Payment links — backend only
+    match /paymentLinks/{linkId} {
+      allow read: if isAuthenticated() && resource.data.uid == request.auth.uid;
+      allow write: if false;
+    }
+
+    // Razorpay orders — backend only
+    match /razorpayOrders/{orderId} {
+      allow read: if isAuthenticated() && resource.data.uid == request.auth.uid;
+      allow write: if false;
+    }
+
+    // Admins
+    match /admins/{adminId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    // Rate limiting — backend only
+    match /rate_limits/{docId} {
+      allow read, write: if false;
+    }
+
+    // Deny everything else
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
