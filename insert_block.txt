@@ -1,0 +1,63 @@
+                  TextField(
+                    controller: nameCtrl,
+                    decoration: const InputDecoration(labelText: 'Name'),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'Online',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Colors.greenAccent,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Name-based search coming soon')),
+                          );
+                        },
+                        child: const Text('Find nutrition'),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () {
+                            final calories = int.tryParse(calCtrl.text.trim());
+                            if (calories != null && calories > 0) {
+                              proteinCtrl.text = ((calories * 0.30) / 4).toStringAsFixed(1);
+                              carbsCtrl.text = ((calories * 0.50) / 4).toStringAsFixed(1);
+                              fatCtrl.text = ((calories * 0.20) / 9).toStringAsFixed(1);
+                              fiberCtrl.text = (calories * 0.025 / 2).toStringAsFixed(1);
+                              sodiumCtrl.text = (calories * 0.4).toString();
+                              sugarCtrl.text = ((calories * 0.10) / 4).toStringAsFixed(1);
+                              setDialogState(() {});
+                            }
+                          },
+                          icon: const Icon(Icons.auto_fix_high, size: 18),
+                          label: const Text('Fill from Calories'),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Name-based search coming soon')),
+                            );
+                          },
+                          icon: const Icon(Icons.search, size: 18),
+                          label: const Text('Search by Name'),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),

@@ -1,0 +1,11 @@
+VerveStride macOS - v1.0.0
+
+This is a placeholder file. Replace with actual macOS build:
+
+1. Build on Mac: flutter build macos --release
+2. Find folder: build/macos/Build/Products/Release/
+3. Zip the VerveStride.app bundle
+4. Rename to: vervestride-macos-v1.0.0.zip
+5. Upload to R2 bucket
+
+Note: Requires macOS machine with Xcode installed.
