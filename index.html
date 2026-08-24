@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base href="/">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="description" content="Intelligence that moves with you. A private AI companion, personal diary for notes, fitness tracker, and wellness assistant designed for those who refuse to compromise between premium experience and personal privacy.">
+  
+  <!-- Premium Positioning -->
+  <meta name="apple-mobile-web-app-title" content="VerveStride AI">
+  <meta name="application-name" content="VerveStride AI">
+  <meta name="msapplication-TileColor" content="#6B46C1">
+  <meta name="theme-color" content="#6B46C1" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#4C3575" media="(prefers-color-scheme: dark)">
+  
+  <!-- Rich Snippets / Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "VerveStride AI",
+    "applicationCategory": "HealthApplication",
+    "operatingSystem": "Web, Android, iOS, Windows, macOS, Linux",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD",
+      "description": "Free with optional premium features"
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.9",
+      "ratingCount": "1247"
+    },
+    "description": "Premium AI-powered fitness and wellness assistant with voice commands, intelligent coaching, and privacy-first design.",
+    "features": [
+      "AI Personal Trainer",
+      "Voice-Activated Assistant",
+      "Meal Analysis with AI",
+      "Real-time Form Check",
+      "Smart Reminders",
+      "Privacy-First Design",
+      "No Subscriptions Required"
+    ]
+  }
+  </script>
+  
+  <!-- Premium Brand Signals -->
+  <!-- Keywords for SEO -->
+  <meta name="keywords" content="AI assistant, personal AI, fitness AI, private AI, voice AI, AI companion, intelligent assistant, AI fitness coach, privacy-first AI, premium AI, conversational AI, AI wellness, smart fitness, AI health assistant, personal diary, digital diary, private notes, journal app, wellness diary, fitness journal">
+  <meta name="author" content="VerveStride AI">
+  <meta name="robots" content="index, follow">
+
+  <link rel="canonical" href="https://vervestrideai.com/">
+  <meta name="theme-color" content="#6B46C1">
+
+  <!-- PWA Meta Tags -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="application-name" content="VerveStride AI">
+
+  <!-- Open Graph Meta Tags -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="VerveStride AI — Intelligence. Privacy. Elegance.">
+  <meta property="og:description" content="Advanced AI technology that respects who you are. Voice-activated intelligence, personal diary for notes, real-time insights, personalized guidance—all while keeping your data entirely yours.">
+  <meta property="og:url" content="https://vervestrideai.com/">
+  <meta property="og:image" content="https://vervestrideai.com/icons/Icon-512.png">
+
+  <!-- Twitter Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="VerveStride AI — Designed for people who value privacy">
+  <meta name="twitter:description" content="The most personal AI assistant and diary. Powerful enough to understand you. Private enough to trust. Beautiful enough to love.">
+  <meta name="twitter:image" content="https://vervestrideai.com/icons/Icon-512.png">
+
+  <!-- Google Sign-In -->
+  <meta name="google-signin-client_id" content="435502718618-gkq9jlq8urtuj3o4dbbp4mc18n267md7.apps.googleusercontent.com">
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+  <!-- iOS Meta Tags & Icons -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="VerveStride AI">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+  <link rel="apple-touch-startup-image" href="icons/Icon-512.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="favicon.png"/>
+  <link rel="shortcut icon" type="image/png" href="favicon.png"/>
+
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="manifest.json">
+
+  <title>VerveStride AI — Your intelligence. Your privacy. Your choice.</title>
+  
+  <!-- Preload TensorFlow.js for faster ML model loading -->
+  <link rel="preload" href="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.20.0/dist/tf.min.js" as="script">
+  <link rel="preload" href="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection@2.1.3/dist/pose-detection.min.js" as="script">
+  
+  <!-- Load movenet bridge before Flutter -->
+  <script src="movenet_bridge.js" defer></script>
+  
+  <!-- Load TTS interop for Web Speech API -->
+  <script src="tts_interop.js" defer></script>
+  
+  <!-- Razorpay Checkout -->
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+  <!-- Firebase JS SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-functions-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-storage-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-analytics-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-messaging-compat.js"></script>
+
+  <!-- Service Worker Registration -->
+  <script>
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    // FIREBASE APP CHECK - PRODUCTION MODE
+    // Debug token removed for production deployment
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(() => {});
+      });
+    }
+
+    // Check if already installed
+    function isAppInstalled() {
+      return window.matchMedia('(display-mode: standalone)').matches ||
+             window.matchMedia('(display-mode: fullscreen)').matches ||
+             window.matchMedia('(display-mode: minimal-ui)').matches ||
+             window.navigator.standalone === true;
+    }
+
+    // PWA Install Prompt - only show if not already installed
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      if (isAppInstalled()) {
+        return; // Already installed, don't show prompt
+      }
+      e.preventDefault();
+      deferredPrompt = e;
+      window.dispatchEvent(new CustomEvent('pwa-install-available'));
+    });
+
+    window.addEventListener('appinstalled', () => {
+      deferredPrompt = null;
+      // Store installation state
+      try {
+        localStorage.setItem('pwa_installed', 'true');
+      } catch (e) {}
+    });
+
+    window.showPWAInstallPrompt = function() {
+      if (isAppInstalled()) {
+        return false; // Already installed
+      }
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(() => {
+          deferredPrompt = null;
+        });
+        return true;
+      }
+      return false;
+    };
+  </script>
+</head>
+<body>
+  <script src="flutter_bootstrap.js" async></script>
+</body>
+</html>
+
