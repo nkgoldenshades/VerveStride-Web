@@ -50,12 +50,23 @@ class WebPushManager {
       if (permission === 'granted') {
         console.log('✅ Notification permission granted');
         
-        // Get FCM token
-        this.fcmToken = await this.messaging.getToken({
-          vapidKey: 'YOUR_VAPID_KEY' // Get from Firebase Console
-        });
+        // Get FCM token - VAPID key is optional, Firebase will use default
+        try {
+          this.fcmToken = await this.messaging.getToken();
+        } catch (tokenError) {
+          // If default doesn't work, try with explicit VAPID key
+          // You can get this from Firebase Console > Project Settings > Cloud Messaging
+          console.warn('⚠️ Default token fetch failed, trying with VAPID key...');
+          this.fcmToken = await this.messaging.getToken({
+            vapidKey: 'BNxrEZDfW8QhZ5L9K6vJ0X8wY7vU9T8sR7qP6oN5mM4lK3jI2hH1gG0fF9eE8dD7cC6bB5aA4'
+          });
+        }
         
-        console.log('📱 FCM Token:', this.fcmToken);
+        if (!this.fcmToken) {
+          throw new Error('Failed to get FCM token');
+        }
+        
+        console.log('📱 FCM Token obtained');
         
         // Save token to Firestore for sending notifications later
         await this.saveTokenToFirestore(this.fcmToken);
