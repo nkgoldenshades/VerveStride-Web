@@ -1,7 +1,7 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
-  <base href="/">
+  <base href="$FLUTTER_BASE_HREF">
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta charset="UTF-8">
@@ -117,6 +117,19 @@
   
   <!-- Web Push Notification Manager -->
   <script src="web-push-manager.js" defer></script>
+  
+  <!-- Initialize Web Push Manager -->
+  <script>
+    // Create global webPushManager instance when DOM is ready
+    window.addEventListener('DOMContentLoaded', () => {
+      if (typeof WebPushManager !== 'undefined') {
+        window.webPushManager = new WebPushManager();
+        console.log('✅ WebPushManager instance created');
+      } else {
+        console.warn('⚠️ WebPushManager class not found');
+      }
+    });
+  </script>
 
   <!-- Service Worker Registration -->
   <script>
