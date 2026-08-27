@@ -141119,7 +141119,8 @@ m.t(new A.b0J(m))
 p=4
 l=2
 f=$.du()
-s=!(f.b>0)||f.a<l?7:8
+e=f.b
+s=!(e>0)||e<l?7:8
 break
 case 7:s=9
 return A.d(m.d.hP("\u274c Insufficient credits. You need "+A.h(l)+" credits to generate an image.\n\nTap the credits display in the top right to purchase more credits."),$async$m7)
@@ -141200,14 +141201,15 @@ return A.d(p.d.br(0),$async$LB)
 case 3:case 1:return A.k(q,r)}})
 return A.l($async$LB,r)},
 mf(a,b){return this.aFH(a,b)},
-aFH(a0,a1){var s=0,r=A.m(t.H),q,p=2,o=[],n=[],m=this,l,k,j,i,h,g,f,e,d,c,b,a
-var $async$mf=A.i(function(a2,a3){if(a2===1){o.push(a3)
+aFH(a1,a2){var s=0,r=A.m(t.H),q,p=2,o=[],n=[],m=this,l,k,j,i,h,g,f,e,d,c,b,a,a0
+var $async$mf=A.i(function(a3,a4){if(a3===1){o.push(a4)
 s=p}for(;;)switch(s){case 0:$.p.$1("\ud83c\udfac [AI Chat] Executing video generation...")
 m.t(new A.b0M(m))
 p=4
 l=25
 c=$.du()
-s=!(c.b>0)||c.a<l?7:8
+b=c.b
+s=!(b>0)||b<l?7:8
 break
 case 7:k=A.ej(null,null,null,"\u274c Insufficient credits. You need "+A.h(l)+" credits to generate a video.\n\nTap the credits display in the top right to purchase more credits.",null,null,null,null,null,null,null,null,null,"assistant",new A.Y(Date.now(),0,!1),null)
 m.t(new A.b0N(m,k))
@@ -141218,7 +141220,7 @@ s=5
 break
 case 8:s=10
 return A.d(c.kt(l,"Video generation"),$async$mf)
-case 10:j=a3
+case 10:j=a4
 s=!j?11:12
 break
 case 11:i=A.ej(null,null,null,u.y,null,null,null,null,null,null,null,null,null,"assistant",new A.Y(Date.now(),0,!1),null)
@@ -141229,8 +141231,8 @@ case 13:n=[1]
 s=5
 break
 case 12:s=14
-return A.d($.jP().jS(a0,a1),$async$mf)
-case 14:h=a3
+return A.d($.jP().jS(a1,a2),$async$mf)
+case 14:h=a4
 s=h!=null?15:17
 break
 case 15:g=A.ej(null,null,null,"\u2728 Here's your generated video!",null,25,null,null,null,null,null,null,25,"assistant",new A.Y(Date.now(),0,!1),h)
@@ -141256,8 +141258,8 @@ case 22:case 16:n.push(6)
 s=5
 break
 case 4:p=3
-a=o.pop()
-e=A.F(a)
+a0=o.pop()
+e=A.F(a0)
 s=23
 return A.d($.du().jQ(25),$async$mf)
 case 23:$.p.$1("\u274c [AI Chat] Video generation error: "+A.h(e))
@@ -141290,14 +141292,15 @@ return A.d(p.d.br(0),$async$Lr)
 case 3:case 1:return A.k(q,r)}})
 return A.l($async$Lr,r)},
 me(a,b){return this.aFC(a,b)},
-aFC(a0,a1){var s=0,r=A.m(t.H),q,p=2,o=[],n=[],m=this,l,k,j,i,h,g,f,e,d,c,b,a
-var $async$me=A.i(function(a2,a3){if(a2===1){o.push(a3)
+aFC(a1,a2){var s=0,r=A.m(t.H),q,p=2,o=[],n=[],m=this,l,k,j,i,h,g,f,e,d,c,b,a,a0
+var $async$me=A.i(function(a3,a4){if(a3===1){o.push(a4)
 s=p}for(;;)switch(s){case 0:$.p.$1("\ud83c\udfb5 [AI Chat] Executing audio generation...")
 m.t(new A.b0C(m))
 p=4
 l=8
 c=$.du()
-s=!(c.b>0)||c.a<l?7:8
+b=c.b
+s=!(b>0)||b<l?7:8
 break
 case 7:k=A.ej(null,null,null,"\u274c Insufficient credits. You need "+A.h(l)+" credits to generate audio.\n\nTap the credits display in the top right to purchase more credits.",null,null,null,null,null,null,null,null,null,"assistant",new A.Y(Date.now(),0,!1),null)
 m.t(new A.b0D(m,k))
@@ -141308,7 +141311,7 @@ s=5
 break
 case 8:s=10
 return A.d(c.kt(l,"Audio generation"),$async$me)
-case 10:j=a3
+case 10:j=a4
 s=!j?11:12
 break
 case 11:i=A.ej(null,null,null,u.y,null,null,null,null,null,null,null,null,null,"assistant",new A.Y(Date.now(),0,!1),null)
@@ -141319,8 +141322,8 @@ case 13:n=[1]
 s=5
 break
 case 12:s=14
-return A.d($.jP().kw(a0,a1),$async$me)
-case 14:h=a3
+return A.d($.jP().kw(a1,a2),$async$me)
+case 14:h=a4
 s=h!=null?15:17
 break
 case 15:g=A.ej(null,null,h,"\u2728 Here's your generated audio!",null,8,null,null,null,null,null,null,8,"assistant",new A.Y(Date.now(),0,!1),null)
@@ -141346,8 +141349,8 @@ case 22:case 16:n.push(6)
 s=5
 break
 case 4:p=3
-a=o.pop()
-e=A.F(a)
+a0=o.pop()
+e=A.F(a0)
 s=23
 return A.d($.du().jQ(8),$async$me)
 case 23:$.p.$1("\u274c [AI Chat] Audio generation error: "+A.h(e))
@@ -141832,8 +141835,8 @@ $0(){var s=this.a
 return s.z=!s.z},
 $S:0}
 A.b1A.prototype={
-$2(a,b){var s=null,r=$.du().a,q=$.ab.S(0.15),p=A.a7(12),o=A.bb($.ab.S(0.3),1)
-return A.ag(s,A.B(""+r+" cr",s,s,s,s,A.b8(s,s,$.ab,s,s,s,s,s,s,s,s,12,s,s,B.ah,s,s,!0,s,s,s,s,s,s,s,s),s,s,s),B.l,s,s,new A.ac(q,s,o,p,s,s,B.o),s,s,B.lH,B.pI,s,s,s)},
+$2(a,b){var s=null,r=$.du().b,q=$.ab.S(0.15),p=A.a7(12),o=A.bb($.ab.S(0.3),1)
+return A.ag(s,A.B(A.h(r)+" cr",s,s,s,s,A.b8(s,s,$.ab,s,s,s,s,s,s,s,s,12,s,s,B.ah,s,s,!0,s,s,s,s,s,s,s,s),s,s,s),B.l,s,s,new A.ac(q,s,o,p,s,s,B.o),s,s,B.lH,B.pI,s,s,s)},
 $S:103}
 A.b1B.prototype={
 $2(a,b){var s=this.a.x.e
