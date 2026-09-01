@@ -1,0 +1,486 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   VERVESTRIDE WEB PUSH NOTIFICATION STYLES
+   Pure CSS notification components and animations
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+    --vs-primary: #6B46C1;
+    --vs-primary-dark: #4C3575;
+    --vs-success: #10B981;
+    --vs-warning: #F59E0B;
+    --vs-error: #EF4444;
+    --vs-info: #3B82F6;
+    
+    --vs-bg-light: #FFFFFF;
+    --vs-bg-dark: #1F2937;
+    --vs-text-light: #1F2937;
+    --vs-text-dark: #F9FAFB;
+    --vs-border-light: #E5E7EB;
+    --vs-border-dark: #374151;
+    
+    --vs-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --vs-shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   NOTIFICATION PERMISSION BANNER
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.vs-notification-banner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 9999;
+    background: linear-gradient(135deg, var(--vs-primary) 0%, var(--vs-primary-dark) 100%);
+    color: white;
+    padding: 1rem;
+    text-align: center;
+    box-shadow: var(--vs-shadow);
+    transform: translateY(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.vs-notification-banner.show {
+    transform: translateY(0);
+}
+
+.vs-notification-banner-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.vs-notification-banner-text {
+    flex: 1;
+    min-width: 200px;
+}
+
+.vs-notification-banner h3 {
+    margin: 0 0 0.25rem 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+}
+
+.vs-notification-banner p {
+    margin: 0;
+    opacity: 0.9;
+    font-size: 0.875rem;
+}
+
+.vs-notification-banner-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.vs-btn {
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.875rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.vs-btn-primary {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.vs-btn-primary:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+}
+
+.vs-btn-secondary {
+    background: transparent;
+    color: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.vs-btn-secondary:hover {
+    color: white;
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   IN-PAGE NOTIFICATION CARDS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.vs-notification-container {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 9998;
+    max-width: 400px;
+    pointer-events: none;
+}
+
+.vs-notification {
+    background: var(--vs-bg-light);
+    border-radius: 0.75rem;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+    box-shadow: var(--vs-shadow-lg);
+    border: 1px solid var(--vs-border-light);
+    pointer-events: all;
+    transform: translateX(100%);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.vs-notification.show {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.vs-notification::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--vs-primary);
+}
+
+.vs-notification.success::before { background: var(--vs-success); }
+.vs-notification.warning::before { background: var(--vs-warning); }
+.vs-notification.error::before { background: var(--vs-error); }
+.vs-notification.info::before { background: var(--vs-info); }
+
+.vs-notification-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.vs-notification-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+    margin-top: 0.125rem;
+}
+
+.vs-notification-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.vs-notification-title {
+    font-weight: 600;
+    color: var(--vs-text-light);
+    margin: 0 0 0.25rem 0;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.vs-notification-message {
+    color: #6B7280;
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    word-wrap: break-word;
+}
+
+.vs-notification-close {
+    background: none;
+    border: none;
+    color: #9CA3AF;
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 0.25rem;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.vs-notification-close:hover {
+    color: var(--vs-text-light);
+    background: #F3F4F6;
+}
+
+.vs-notification-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.vs-notification-actions .vs-btn {
+    font-size: 0.8rem;
+    padding: 0.375rem 0.75rem;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PUSH SUBSCRIPTION STATUS INDICATOR
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.vs-push-status {
+    position: fixed;
+    bottom: 1rem;
+    left: 1rem;
+    background: var(--vs-bg-light);
+    border-radius: 2rem;
+    padding: 0.75rem 1rem;
+    box-shadow: var(--vs-shadow);
+    border: 1px solid var(--vs-border-light);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    z-index: 9997;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.vs-push-status:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--vs-shadow-lg);
+}
+
+.vs-push-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--vs-error);
+    animation: pulse 2s infinite;
+}
+
+.vs-push-status.enabled .vs-push-status-dot {
+    background: var(--vs-success);
+    animation: none;
+}
+
+.vs-push-status.pending .vs-push-status-dot {
+    background: var(--vs-warning);
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   NOTIFICATION PERMISSION MODAL
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.vs-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    padding: 1rem;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.vs-modal-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.vs-modal {
+    background: var(--vs-bg-light);
+    border-radius: 1rem;
+    padding: 2rem;
+    max-width: 500px;
+    width: 100%;
+    box-shadow: var(--vs-shadow-lg);
+    transform: scale(0.9);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.vs-modal-overlay.show .vs-modal {
+    transform: scale(1);
+}
+
+.vs-modal-header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.vs-modal-icon {
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+}
+
+.vs-modal-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--vs-text-light);
+    margin: 0 0 0.5rem 0;
+}
+
+.vs-modal-description {
+    color: #6B7280;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.vs-modal-actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   DARK MODE SUPPORT
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@media (prefers-color-scheme: dark) {
+    .vs-notification {
+        background: var(--vs-bg-dark);
+        border-color: var(--vs-border-dark);
+        color: var(--vs-text-dark);
+    }
+    
+    .vs-notification-title {
+        color: var(--vs-text-dark);
+    }
+    
+    .vs-notification-close:hover {
+        background: var(--vs-border-dark);
+    }
+    
+    .vs-push-status,
+    .vs-modal {
+        background: var(--vs-bg-dark);
+        border-color: var(--vs-border-dark);
+        color: var(--vs-text-dark);
+    }
+    
+    .vs-modal-title {
+        color: var(--vs-text-dark);
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   RESPONSIVE DESIGN
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+    .vs-notification-banner-content {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .vs-notification-container {
+        left: 1rem;
+        right: 1rem;
+        max-width: none;
+    }
+    
+    .vs-notification {
+        margin-bottom: 0.5rem;
+    }
+    
+    .vs-push-status {
+        left: 50%;
+        transform: translateX(-50%);
+        bottom: 1rem;
+    }
+    
+    .vs-modal {
+        padding: 1.5rem;
+        margin: 1rem;
+    }
+    
+    .vs-modal-actions {
+        flex-direction: column;
+    }
+    
+    .vs-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .vs-notification-banner {
+        padding: 0.75rem;
+    }
+    
+    .vs-notification {
+        padding: 0.75rem;
+    }
+    
+    .vs-modal {
+        padding: 1rem;
+        border-radius: 0.75rem;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ACCESSIBILITY ENHANCEMENTS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+    .vs-notification,
+    .vs-notification-banner,
+    .vs-push-status,
+    .vs-modal,
+    .vs-modal-overlay {
+        transition: none;
+    }
+    
+    .vs-push-status-dot {
+        animation: none;
+    }
+}
+
+/* Focus styles for keyboard navigation */
+.vs-btn:focus,
+.vs-notification-close:focus,
+.vs-push-status:focus {
+    outline: 2px solid var(--vs-primary);
+    outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .vs-notification,
+    .vs-modal,
+    .vs-push-status {
+        border-width: 2px;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   UTILITY CLASSES
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.vs-hide { display: none !important; }
+.vs-sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
