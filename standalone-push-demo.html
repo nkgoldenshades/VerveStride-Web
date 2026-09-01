@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VerveStride - Web Push Notifications Demo</title>
+    <style>
+        :root {
+            --primary-color: #6B46C1;
+            --primary-dark: #4C3575;
+            --success-color: #10B981;
+            --warning-color: #F59E0B;
+            --error-color: #EF4444;
+            --bg-color: #F8FAFC;
+            --card-bg: #FFFFFF;
+            --text-color: #1F2937;
+            --text-secondary: #6B7280;
+            --border-color: #E5E7EB;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--bg-color) 0%, #E0E7FF 100%);
+            color: var(--text-color);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            color: var(--primary-color);
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+        }
+
+        .status-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success-color);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .status-warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning-color);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        .status-error {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error-color);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        .button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .button:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .button:disabled {
+            background: var(--text-secondary);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .button-secondary {
+            background: var(--border-color);
+            color: var(--text-color);
+        }
+
+        .button-secondary:hover {
+            background: #D1D5DB;
+        }
+
+        .notification-form {
+            display: grid;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        label {
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        input, textarea, select {
+            padding: 0.75rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .token-display {
+            background: #F3F4F6;
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            word-break: break-all;
+            color: var(--text-secondary);
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .feature-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .logs {
+            background: #1F2937;
+            color: #F9FAFB;
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .card {
+                padding: 1.5rem;
+            }
+            
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔔 VerveStride Web Push</h1>
+            <p>Complete JavaScript Web Push Notification System</p>
+        </div>
+
+        <!-- Status Card -->
+        <div class="card">
+            <h2>📊 Push Notification Status</h2>
+            <div id="status-indicator" class="status-indicator status-warning">
+                <div class="status-dot"></div>
+                <span id="status-text">Checking notification support...</span>
+            </div>
+            
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🌐</div>
+                    <h3>Browser Support</h3>
+                    <p id="browser-support">Checking...</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔑</div>
+                    <h3>Permission Status</h3>
+                    <p id="permission-status">Unknown</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🏷️</div>
+                    <h3>Registration</h3>
+                    <p id="registration-status">Not registered</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controls Card -->
+        <div class="card">
+            <h2>🎮 Push Notification Controls</h2>
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1rem;">
+                <button id="request-permission" class="button">
+                    🔔 Request Permission
+                </button>
+                <button id="subscribe-btn" class="button" disabled>
+                    📧 Subscribe to Push
+                </button>
+                <button id="unsubscribe-btn" class="button button-secondary" disabled>
+                    🚫 Unsubscribe
+                </button>
+                <button id="test-notification" class="button button-secondary" disabled>
+                    🧪 Test Notification
+                </button>
+            </div>
+        </div>
+
+        <!-- Send Notification Card -->
+        <div class="card">
+            <h2>📤 Send Test Notification</h2>
+            <form id="notification-form" class="notification-form">
+                <div class="form-group">
+                    <label for="notification-title">Title</label>
+                    <input type="text" id="notification-title" value="VerveStride AI" placeholder="Notification title">
+                </div>
+                <div class="form-group">
+                    <label for="notification-body">Message</label>
+                    <textarea id="notification-body" placeholder="Your workout reminder is ready!">🏋️ Time for your daily workout! Let's get moving and crush those fitness goals.</textarea>
+                </div>
+                <div class="form-group">
+                    <label for="notification-icon">Icon URL</label>
+                    <input type="url" id="notification-icon" value="/icons/Icon-192.png" placeholder="https://example.com/icon.png">
+                </div>
+                <div class="form-group">
+                    <label for="notification-url">Click URL (optional)</label>
+                    <input type="url" id="notification-url" value="/" placeholder="https://vervestrideai.com/workout">
+                </div>
+                <button type="submit" class="button">🚀 Send Notification</button>
+            </form>
+        </div>
+
+        <!-- Subscription Info Card -->
+        <div class="card">
+            <h2>🔑 Subscription Details</h2>
+            <div class="form-group">
+                <label for="subscription-endpoint">Subscription Endpoint</label>
+                <div id="subscription-endpoint" class="token-display">Not subscribed yet</div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
+                <div class="form-group">
+                    <label>P256DH Key</label>
+                    <div id="p256dh-key" class="token-display">-</div>
+                </div>
+                <div class="form-group">
+                    <label>Auth Key</label>
+                    <div id="auth-key" class="token-display">-</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Console Logs -->
+        <div class="card">
+            <h2>📋 Console Logs</h2>
+            <div id="console-logs" class="logs">
+                <div>🟢 Web Push Demo initialized</div>
+            </div>
+            <button id="clear-logs" class="button button-secondary" style="margin-top: 1rem;">
+                🗑️ Clear Logs
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // ═══════════════════════════════════════════════════════════════════════════
+        // PURE JAVASCRIPT WEB PUSH NOTIFICATION SYSTEM
+        // Complete implementation with Service Worker and Push API
+        // ═══════════════════════════════════════════════════════════════════════════
+
+        class VerveStridePushManager {
+            constructor() {
+                this.swRegistration = null;
+                this.pushSubscription = null;
+                this.vapidPublicKey = 'BJQqStCZ5cH5wGpR3GnKqgeLzLjouxXJOvB5-2-xO9Qmh7PT_3OPZGrjE4w7SjJCJ6jN1-xRpL5Pm3yLfN0sDt8'; // Replace with your VAPID key
+                
+                this.initializeElements();
+                this.initializeEventListeners();
+                this.initializePushManager();
+            }
+
+            initializeElements() {
+                this.elements = {
+                    statusIndicator: document.getElementById('status-indicator'),
+                    statusText: document.getElementById('status-text'),
+                    browserSupport: document.getElementById('browser-support'),
+                    permissionStatus: document.getElementById('permission-status'),
+                    registrationStatus: document.getElementById('registration-status'),
+                    requestPermissionBtn: document.getElementById('request-permission'),
+                    subscribeBtn: document.getElementById('subscribe-btn'),
+                    unsubscribeBtn: document.getElementById('unsubscribe-btn'),
+                    testNotificationBtn: document.getElementById('test-notification'),
+                    notificationForm: document.getElementById('notification-form'),
+                    subscriptionEndpoint: document.getElementById('subscription-endpoint'),
+                    p256dhKey: document.getElementById('p256dh-key'),
+                    authKey: document.getElementById('auth-key'),
+                    consoleLogs: document.getElementById('console-logs'),
+                    clearLogsBtn: document.getElementById('clear-logs')
+                };
+            }
+
+            initializeEventListeners() {
+                this.elements.requestPermissionBtn.addEventListener('click', () => this.requestPermission());
+                this.elements.subscribeBtn.addEventListener('click', () => this.subscribeToPush());
+                this.elements.unsubscribeBtn.addEventListener('click', () => this.unsubscribeFromPush());
+                this.elements.testNotificationBtn.addEventListener('click', () => this.showTestNotification());
+                this.elements.notificationForm.addEventListener('submit', (e) => this.handleNotificationForm(e));
+                this.elements.clearLogsBtn.addEventListener('click', () => this.clearLogs());
+            }
+
+            async initializePushManager() {
+                this.log('🔄 Initializing Push Manager...');
+                
+                // Check browser support
+                this.checkBrowserSupport();
+                
+                // Register service worker
+                await this.registerServiceWorker();
+                
+                // Check current status
+                await this.updateStatus();
+                
+                this.log('✅ Push Manager initialized');
+            }
+
+            checkBrowserSupport() {
+                const hasNotifications = 'Notification' in window;
+                const hasServiceWorker = 'serviceWorker' in navigator;
+                const hasPushManager = 'PushManager' in window;
+                
+                if (hasNotifications && hasServiceWorker && hasPushManager) {
+                    this.elements.browserSupport.textContent = '✅ Fully Supported';
+                    this.log('✅ Browser fully supports web push notifications');
+                } else {
+                    this.elements.browserSupport.textContent = '❌ Not Supported';
+                    this.log('❌ Browser does not support web push notifications');
+                    this.setStatus('error', 'Browser does not support push notifications');
+                    return false;
+                }
+                
+                return true;
+            }
+
+            async registerServiceWorker() {
+                if (!('serviceWorker' in navigator)) {
+                    throw new Error('Service workers not supported');
+                }
+
+                try {
+                    // Create inline service worker
+                    const swCode = this.getServiceWorkerCode();
+                    const blob = new Blob([swCode], { type: 'application/javascript' });
+                    const swUrl = URL.createObjectURL(blob);
+                    
+                    this.swRegistration = await navigator.serviceWorker.register(swUrl);
+                    this.elements.registrationStatus.textContent = '✅ Registered';
+                    this.log('✅ Service Worker registered successfully');
+                    
+                    // Listen for messages from service worker
+                    navigator.serviceWorker.addEventListener('message', (event) => {
+                        this.log(`📨 SW Message: ${JSON.stringify(event.data)}`);
+                    });
+                    
+                } catch (error) {
+                    this.elements.registrationStatus.textContent = '❌ Failed';
+                    this.log(`❌ Service Worker registration failed: ${error.message}`);
+                    throw error;
+                }
+            }
+
+            getServiceWorkerCode() {
+                return `
+                    // VerveStride Push Service Worker
+                    self.addEventListener('push', function(event) {
+                        console.log('🔔 Push received:', event);
+                        
+                        let data = {};
+                        if (event.data) {
+                            try {
+                                data = event.data.json();
+                            } catch (e) {
+                                data = { title: 'VerveStride AI', body: event.data.text() };
+                            }
+                        }
+                        
+                        const options = {
+                            title: data.title || 'VerveStride AI',
+                            body: data.body || 'You have a new notification',
+                            icon: data.icon || '/icons/Icon-192.png',
+                            badge: '/icons/Icon-192.png',
+                            image: data.image,
+                            data: data.data || {},
+                            actions: data.actions || [
+                                { action: 'open', title: 'Open App', icon: '/icons/Icon-192.png' },
+                                { action: 'dismiss', title: 'Dismiss', icon: '/icons/Icon-192.png' }
+                            ],
+                            requireInteraction: data.requireInteraction || false,
+                            silent: data.silent || false,
+                            tag: data.tag || 'vervestride-notification',
+                            timestamp: Date.now(),
+                            vibrate: data.vibrate || [200, 100, 200]
+                        };
+                        
+                        event.waitUntil(
+                            self.registration.showNotification(options.title, options)
+                        );
+                    });
+                    
+                    self.addEventListener('notificationclick', function(event) {
+                        console.log('🖱️ Notification clicked:', event);
+                        event.notification.close();
+                        
+                        const action = event.action;
+                        const data = event.notification.data;
+                        
+                        if (action === 'dismiss') {
+                            return;
+                        }
+                        
+                        let url = data.url || '/';
+                        if (action === 'open') {
+                            url = data.url || '/';
+                        }
+                        
+                        event.waitUntil(
+                            clients.openWindow(url)
+                        );
+                    });
+                    
+                    self.addEventListener('notificationclose', function(event) {
+                        console.log('🔕 Notification closed:', event);
+                    });
+                `;
+            }
+
+            async requestPermission() {
+                this.log('🔔 Requesting notification permission...');
+                
+                try {
+                    const permission = await Notification.requestPermission();
+                    this.elements.permissionStatus.textContent = this.getPermissionEmoji(permission) + ' ' + permission;
+                    
+                    if (permission === 'granted') {
+                        this.log('✅ Notification permission granted');
+                        this.setStatus('success', 'Notification permission granted');
+                        this.elements.subscribeBtn.disabled = false;
+                    } else if (permission === 'denied') {
+                        this.log('❌ Notification permission denied');
+                        this.setStatus('error', 'Notification permission denied');
+                    } else {
+                        this.log('⚠️ Notification permission dismissed');
+                        this.setStatus('warning', 'Notification permission dismissed');
+                    }
+                } catch (error) {
+                    this.log(`❌ Error requesting permission: ${error.message}`);
+                    this.setStatus('error', 'Failed to request permission');
+                }
+            }
+
+            async subscribeToPush() {
+                if (!this.swRegistration) {
+                    this.log('❌ No service worker registration found');
+                    return;
+                }
+
+                try {
+                    this.log('📧 Subscribing to push notifications...');
+                    
+                    const subscription = await this.swRegistration.pushManager.subscribe({
+                        userVisibleOnly: true,
+                        applicationServerKey: this.urlBase64ToUint8Array(this.vapidPublicKey)
+                    });
+
+                    this.pushSubscription = subscription;
+                    this.displaySubscriptionInfo(subscription);
+                    this.elements.unsubscribeBtn.disabled = false;
+                    this.elements.testNotificationBtn.disabled = false;
+                    
+                    this.log('✅ Successfully subscribed to push notifications');
+                    this.setStatus('success', 'Subscribed to push notifications');
+                    
+                } catch (error) {
+                    this.log(`❌ Failed to subscribe: ${error.message}`);
+                    this.setStatus('error', 'Failed to subscribe to push notifications');
+                }
+            }
+
+            async unsubscribeFromPush() {
+                if (!this.pushSubscription) {
+                    this.log('⚠️ No active subscription found');
+                    return;
+                }
+
+                try {
+                    await this.pushSubscription.unsubscribe();
+                    this.pushSubscription = null;
+                    this.clearSubscriptionInfo();
+                    this.elements.unsubscribeBtn.disabled = true;
+                    this.elements.testNotificationBtn.disabled = true;
+                    
+                    this.log('✅ Successfully unsubscribed from push notifications');
+                    this.setStatus('warning', 'Unsubscribed from push notifications');
+                } catch (error) {
+                    this.log(`❌ Failed to unsubscribe: ${error.message}`);
+                }
+            }
+
+            async showTestNotification() {
+                if (Notification.permission !== 'granted') {
+                    this.log('❌ Permission not granted for notifications');
+                    return;
+                }
+
+                try {
+                    const notification = new Notification('🧪 VerveStride Test', {
+                        body: 'This is a test notification from VerveStride AI',
+                        icon: '/icons/Icon-192.png',
+                        badge: '/icons/Icon-192.png',
+                        tag: 'test-notification',
+                        requireInteraction: false,
+                        data: { url: '/', test: true }
+                    });
+
+                    notification.onclick = () => {
+                        window.focus();
+                        notification.close();
+                    };
+
+                    setTimeout(() => notification.close(), 5000);
+                    this.log('✅ Test notification shown');
+                } catch (error) {
+                    this.log(`❌ Failed to show test notification: ${error.message}`);
+                }
+            }
+
+            handleNotificationForm(event) {
+                event.preventDefault();
+                
+                const title = document.getElementById('notification-title').value;
+                const body = document.getElementById('notification-body').value;
+                const icon = document.getElementById('notification-icon').value;
+                const url = document.getElementById('notification-url').value;
+
+                if (Notification.permission === 'granted') {
+                    const notification = new Notification(title, {
+                        body: body,
+                        icon: icon || '/icons/Icon-192.png',
+                        badge: '/icons/Icon-192.png',
+                        tag: 'custom-notification',
+                        data: { url: url || '/' }
+                    });
+
+                    notification.onclick = () => {
+                        if (url) window.open(url, '_blank');
+                        notification.close();
+                    };
+
+                    this.log(`✅ Custom notification sent: "${title}"`);
+                } else {
+                    this.log('❌ Cannot send notification: permission not granted');
+                }
+            }
+
+            async updateStatus() {
+                // Update permission status
+                const permission = Notification.permission;
+                this.elements.permissionStatus.textContent = this.getPermissionEmoji(permission) + ' ' + permission;
+
+                // Check if already subscribed
+                if (this.swRegistration) {
+                    try {
+                        const subscription = await this.swRegistration.pushManager.getSubscription();
+                        if (subscription) {
+                            this.pushSubscription = subscription;
+                            this.displaySubscriptionInfo(subscription);
+                            this.elements.unsubscribeBtn.disabled = false;
+                            this.elements.testNotificationBtn.disabled = false;
+                            this.setStatus('success', 'Push notifications enabled');
+                        }
+                    } catch (error) {
+                        this.log(`❌ Error checking subscription: ${error.message}`);
+                    }
+                }
+
+                // Enable subscribe button if permission granted
+                if (permission === 'granted') {
+                    this.elements.subscribeBtn.disabled = false;
+                }
+            }
+
+            displaySubscriptionInfo(subscription) {
+                const endpoint = subscription.endpoint;
+                const keys = subscription.getKey ? {
+                    p256dh: subscription.getKey('p256dh'),
+                    auth: subscription.getKey('auth')
+                } : null;
+
+                this.elements.subscriptionEndpoint.textContent = endpoint;
+                
+                if (keys) {
+                    this.elements.p256dhKey.textContent = this.arrayBufferToBase64(keys.p256dh);
+                    this.elements.authKey.textContent = this.arrayBufferToBase64(keys.auth);
+                } else {
+                    this.elements.p256dhKey.textContent = 'Not available';
+                    this.elements.authKey.textContent = 'Not available';
+                }
+            }
+
+            clearSubscriptionInfo() {
+                this.elements.subscriptionEndpoint.textContent = 'Not subscribed yet';
+                this.elements.p256dhKey.textContent = '-';
+                this.elements.authKey.textContent = '-';
+            }
+
+            setStatus(type, message) {
+                const indicator = this.elements.statusIndicator;
+                const text = this.elements.statusText;
+                
+                indicator.className = `status-indicator status-${type}`;
+                text.textContent = message;
+            }
+
+            getPermissionEmoji(permission) {
+                switch (permission) {
+                    case 'granted': return '✅';
+                    case 'denied': return '❌';
+                    case 'default': return '⏳';
+                    default: return '❓';
+                }
+            }
+
+            log(message) {
+                const timestamp = new Date().toLocaleTimeString();
+                const logEntry = document.createElement('div');
+                logEntry.textContent = `[${timestamp}] ${message}`;
+                this.elements.consoleLogs.appendChild(logEntry);
+                this.elements.consoleLogs.scrollTop = this.elements.consoleLogs.scrollHeight;
+                console.log(message);
+            }
+
+            clearLogs() {
+                this.elements.consoleLogs.innerHTML = '<div>🟢 Logs cleared</div>';
+            }
+
+            // Utility functions
+            urlBase64ToUint8Array(base64String) {
+                const padding = '='.repeat((4 - base64String.length % 4) % 4);
+                const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+                const rawData = window.atob(base64);
+                const outputArray = new Uint8Array(rawData.length);
+                for (let i = 0; i < rawData.length; ++i) {
+                    outputArray[i] = rawData.charCodeAt(i);
+                }
+                return outputArray;
+            }
+
+            arrayBufferToBase64(buffer) {
+                if (!buffer) return 'Not available';
+                const bytes = new Uint8Array(buffer);
+                let binary = '';
+                for (let i = 0; i < bytes.byteLength; i++) {
+                    binary += String.fromCharCode(bytes[i]);
+                }
+                return window.btoa(binary);
+            }
+        }
+
+        // Initialize the Push Manager when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            window.verveStridePush = new VerveStridePushManager();
+        });
+    </script>
+</body>
+</html>
