@@ -140346,7 +140346,7 @@ $S:0}
 A.b01.prototype={
 $0(){var s=this.a.c
 s.toString
-A.jl(s,"/credits",t.X)},
+A.jl(s,"/premium",t.X)},
 $S:0}
 A.b02.prototype={
 $0(){this.a.as=!1},
@@ -148474,12 +148474,12 @@ r=t.p
 d=A.af(g,A.ad(A.b([A.ae(A.b([A.aS(B.jD,B.e,g,32),B.ay,A.aW(A.B("Get Native Apps",g,g,g,g,A.b0(g,g,B.e,g,g,g,g,g,g,g,g,24,g,g,B.S,g,g,!0,g,g,g,g,g,g,g,g),g,g,g),1)],r),B.k,g,B.h,B.i,0,g,g),B.J,A.B("For best experience with alarms, reminders, and offline features, download the native app for your device.",g,g,g,g,A.b0(g,g,A.C(B.d.P(229.5),B.e.j()>>>16&255,B.e.j()>>>8&255,B.e.j()&255),g,g,g,g,g,g,g,g,14,g,g,g,g,g,!0,g,g,g,g,g,g,g,g),g,g,g)],r),B.x,B.h,B.i,0,B.m),B.l,g,g,new A.ac(g,g,g,s,g,new A.ez(B.bu,B.c3,B.aL,d,g,g),B.o),g,g,g,B.P,g,g,g)
 s=h.aAe(B.yL,A.b(["\u2713 Reliable alarms & reminders (works with screen off)","\u2713 Better performance & battery life","\u2713 Offline workout tracking","\u2713 System integration (widgets, shortcuts)","\u2713 No browser limitations"],t.s),"Why Native Apps?")
 q=A.B("Mobile",g,g,g,g,A.b0(g,g,B.e,g,g,g,g,g,g,g,g,20,g,g,B.S,g,g,!0,g,g,g,g,g,g,g,g),g,g,g)
-p=h.TI("Recommended for MIUI",A.ct(4282244228),a,"https://downloads.vervestrideai.com/vervestride-v1.0.0.apk",B.a5V,"APK for Android 8.0+","Android")
+p=h.TI("Recommended for MIUI",A.ct(4282244228),a,"https://downloads.vervestrideai.com/vervestride_vervestride-v1.0.0.apk",B.a5V,"APK for Android 8.0+","Android")
 o=h.TI("Coming Soon",A.ct(f),a,g,B.a7q,"Coming to App Store","iOS")
 n=A.B("Desktop",g,g,g,g,A.b0(g,g,B.e,g,g,g,g,g,g,g,g,20,g,g,B.S,g,g,!0,g,g,g,g,g,g,g,g),g,g,g)
-m=h.TH(A.ct(4278221012),a,"https://downloads.vervestrideai.com/vervestride-windows-v1.0.0.zip",B.a69,"Installer for Windows 10/11","Windows")
-l=h.TH(A.ct(f),a,"https://downloads.vervestrideai.com/vervestride-macos-v1.0.0.zip",B.a6r,"DMG for macOS 11+","macOS")
-k=h.TH(A.ct(4294755876),a,"https://downloads.vervestrideai.com/vervestride-linux-v1.0.0.tar.gz",B.a68,"AppImage / Snap","Linux")
+m=h.TH(A.ct(4278221012),a,"https://downloads.vervestrideai.com/vervestride_vervestride-windows-v1.0.0.zip",B.a69,"Installer for Windows 10/11","Windows")
+l=h.TH(A.ct(f),a,"https://downloads.vervestrideai.com/vervestride_vervestride-macos_v1.0.0.zip",B.a6r,"DMG for macOS 11+","macOS")
+k=h.TH(A.ct(4294755876),a,"https://downloads.vervestrideai.com/vervestride_vervestride-linux-v1.0.0.tar.gz",B.a68,"AppImage / Snap","Linux")
 j=A.a6(12)
 i=A.bb($.aa.S(0.3),1)
 return A.jZ(e,B.ei,A.eQ(A.ad(A.b([d,B.aT,s,B.aT,q,B.J,p,B.J,o,B.aT,n,B.J,m,B.J,l,B.J,k,B.aT,A.af(g,A.ae(A.b([A.aS(B.i3,$.aa,g,20),B.ay,A.aW(A.B("All apps sync with your account. Your data stays private and secure.",g,g,g,g,A.b0(g,g,B.w,g,g,g,g,g,g,g,g,13,g,g,g,g,g,!0,g,g,g,g,g,g,g,g),g,g,g),1)],r),B.k,g,B.h,B.i,0,g,g),B.l,g,g,new A.ac(B.t,g,i,j,g,g,B.o),g,g,g,B.O,g,g,g),B.Om],r),B.x,B.h,B.i,0,B.m),g,B.u,B.O,g,g,B.a1),g,!1,!1,g,g)},
@@ -159509,7 +159509,7 @@ A.bcc.prototype={
 $0(){this.a.f=!1},
 $S:0}
 A.bc_.prototype={
-$0(){A.jl(this.a,"/credits",t.X)},
+$0(){A.jl(this.a,"/premium",t.X)},
 $S:0}
 A.bc0.prototype={
 $0(){return this.a.k3=null},
